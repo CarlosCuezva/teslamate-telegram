@@ -6,8 +6,6 @@ Python container that collects data from the Teslamate MQTT and sends messages t
 
 1. Create a file called `docker-compose.yml` with the following content:
 ~~~
-docker-compose.yml
-
 version: "3"
 
 services:
