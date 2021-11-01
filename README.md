@@ -22,3 +22,6 @@ services:
 ~~~
 2. Replace `XXX` with its corresponding values
 3. Start the docker containers with `docker-compose up`. To run the container in the background add the `-d` flag:
+~~~
+docker-compose up -d
+~~~
