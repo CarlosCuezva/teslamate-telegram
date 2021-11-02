@@ -2,6 +2,10 @@
 
 Python container that collects data from the Teslamate MQTT and sends messages to a Telegram chatbot.
 
+### Requirements
+
+* A machine with an architecture x86_64 or amd64
+
 ### Instructions
 
 1. Create a file called `docker-compose.yml` with the following content:
