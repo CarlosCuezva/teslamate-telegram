@@ -4,7 +4,7 @@ Python container that collects data from the Teslamate MQTT and sends messages t
 
 ### Requirements
 
-* A machine with an architecture x86_64 or amd64
+* A machine with an architecture *x86_64* or *amd64*
 
 ### Instructions
 
