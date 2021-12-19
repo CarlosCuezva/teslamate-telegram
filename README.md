@@ -6,32 +6,32 @@ Python container that collects data from the Teslamate MQTT and sends messages t
 
 ### Requirements
 
-* A machine with an architecture *x86_64* or *amd64*
+* Python 3.10+
+* Install dependencies of Python included in requirements.txt
 
 ### Instructions
 
-1. Create a file called `docker-compose.yml` with the following content:
+1. Install all dependencies of Python
 ~~~
-version: "3"
-
-services:
-  telegrambot:
-      image: carlosct/teslamatetotelegram:latest
-      restart: always
-      environment:
-        - MQTT_SERVER=XXX
-        - MQTT_PORT=XXX
-        - BOT_TOKEN=XXX
-        - BOT_CHAT_ID=XXX
-        - CAR_ID=X
-        - OPTIONS=state|update_version|display_name
+pip install -r requirements.txt
 ~~~
-2. Replace `XXX` with its corresponding values
-3. Available options:
-- "display_name": Send notification when car name is changed
-- "update_version": Send notification when a new version of the car software is available
-- "state": Send notification with any change in the status of the car, for example: asleep, charging, ...
-4. Start the docker containers with `docker-compose up`. To run the container in the background add the `-d` flag:
+2. Create the `config.py` file
+3. Configure the variables of your MQTT of Teslamate and ABRP inside `config.py` file
 ~~~
-docker-compose up -d
+MQTT_SERVER = "@@@@@@@@"                              # MQTT server address (e.g. "127.0.0.1")
+MQTT_PORT = "@@@@"                                    # MQTT server port (e.g. "1883")
+BOT_TOKEN = "@@@@@@@@@@:@@@@@@@@@@@@@@@@@@@@"         # Bot token
+BOT_CHAT_ID = "@@@@@@@@@@"                            # Chat ID
+OPTIONS = "update_version"                            # Select options to send notification (options: state, update_version, display_name, (e.g. "state|update_version"))  
+CAR_ID = "1"                                          # Car number (usually 1 if you only have a car)
+DEBUG = True/False                                    # Enable or disable debug mode
+~~~
+4. Run the script
+* Run on command line (ideal for testing)
+~~~
+python ./teslamateMqttToTelegram.py
+~~~
+* Run in the background
+~~~
+nohup python ./teslamateMqttToTelegram.py &
 ~~~

@@ -1,57 +1,71 @@
 import paho.mqtt.client as mqtt
 import requests
 import sys
-import datetime
-import calendar
 from time import sleep
-import os
+import config as conf
+import logging
+import logging.handlers
 
-# TeslaMate config
-MQTT_SERVER = os.environ['MQTT_SERVER']
-MQTT_PORT = int(os.environ['MQTT_PORT'])
-
-# Tesla car ID, default 1
-CAR_ID = os.environ['CAR_ID']
-
-# Telegram config
-BOT_TOKEN = os.environ['BOT_TOKEN']
-BOT_CHAT_ID = os.environ['BOT_CHAT_ID']
-
-# Select messages for Telegram
-OPTIONS = os.environ['OPTIONS'].split("|")
-
-data = { 
-  "utc": "",
-  "display_name": "",
-  "state": "",
-  "software_current_version": "",
-  "software_new_version": ""
+data = {
+    "display_name": "",
+    "state": "",
+    "software_current_version": "",
+    "software_new_version": ""
 }
 botMessage = {
     "send": 1,
     "text": ""
 }
+logger = logging.getLogger()
+RESTART = 15
+OPTIONS = conf.OPTIONS.split("|")
+
+
+def setup_logging():
+    if conf.DEBUG:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
+    handler = logging.handlers.RotatingFileHandler('teslamate2telegram.log', maxBytes=10000000, backupCount=5)
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(funcName)s:%(lineno)s - %(message)s")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
 
 def on_connect(client, userdata, flags, rc):
     global botMessage
- 
+
+    if conf.DEBUG:
+        logger.info("Connected to the TeslaMate MQTT")
+
+    client.subscribe("teslamate/cars/" + conf.CAR_ID + "/#")
+
     botMessage = {
         "send": 0,
         "text": "🎉 Ahora estás conectado con _TeslaMate_ 🎉"
     }
     sendToTelegram()
 
+
+def on_disconnect(client, userdata, rc=0):
+    if conf.DEBUG:
+        logger.debug("Disconnected: result code " + str(rc))
+
+    client.loop_stop()
+    sleep(RESTART)
+    create_mqtt_connection()
+
+
 def on_message(client, userdata, message):
     global botMessage
     global data
 
-    channel = ""
     try:
-        channel = str(message.topic).split('/')[3]
+        topic = str(message.topic).split('/')[3]
         payload = str(message.payload.decode("utf-8"))
         text = ""
 
-        match channel:
+        match topic:
             case 'display_name':
                 if data["display_name"] != "" and data["display_name"] != payload:
                     text = "🚘 ha cambiado su nombre a *{}*".format(payload)
@@ -81,20 +95,21 @@ def on_message(client, userdata, message):
                         text = "⭕ tiene un estado desconocido"
 
                 data["state"] = payload
-        
+
         if text != "":
             botMessage = {
                 "send": 0,
                 "text": text
             }
-            
-        if(channel in OPTIONS and botMessage['send'] == 0 and botMessage['text'] != ""):
+
+        if topic in OPTIONS and botMessage['send'] == 0 and botMessage['text'] != "":
             sendToTelegram()
 
         return
 
     except:
-        print("unexpected exception while processing message:", sys.exc_info()[0], message.topic, channel, message.payload)
+        logger.error("Exception on_message(): ", sys.exc_info()[0], message.topic, message.payload)
+
 
 def sendToTelegram():
     global botMessage
@@ -102,30 +117,42 @@ def sendToTelegram():
     txt = "*{}* {}"
     txt = txt.format(data["display_name"], botMessage['text'])
 
-    send_text = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + BOT_CHAT_ID + '&parse_mode=Markdown&text=' + txt
+    send_text = 'https://api.telegram.org/bot' + conf.BOT_TOKEN + '/sendMessage?chat_id=' + conf.BOT_CHAT_ID + '&parse_mode=Markdown&text=' + txt
     response = requests.get(send_text)
+    if conf.DEBUG:
+        logger.debug(data)
+        logger.debug(response.text)
 
-    botMessage = {"send": 1, "text": "" }
+    botMessage = {"send": 1, "text": ""}
+
+
+def create_mqtt_connection():
+    client = mqtt.Client()
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.on_disconnect = on_disconnect
+
+    try:
+        if conf.DEBUG:
+            logger.info("Trying to connect to the MQTT")
+
+        client.connect(conf.MQTT_SERVER, int(conf.MQTT_PORT), 30)
+        client.loop_start()
+
+    except (ValueError, Exception):
+        if conf.DEBUG:
+            logger.error("Error trying to connect to the MQTT")
+        sleep(RESTART)
+        create_mqtt_connection()
 
 
 def main():
-    client = mqtt.Client("teslamateToATelegram")
-    client.on_connect = on_connect
-    client.on_message=on_message
-
-    client.connect(str(MQTT_SERVER), MQTT_PORT)
-    client.subscribe("teslamate/cars/"+str(CAR_ID)+"/#")
-
-    client.loop_start()
+    setup_logging()
+    create_mqtt_connection()
 
     while True:
-        current_datetime = datetime.datetime.utcnow()
-        current_timetuple = current_datetime.utctimetuple()
-        data["utc"] = calendar.timegm(current_timetuple)
-        
         sleep(5)
-    
-    client.loop_stop()
+
 
 if __name__ == '__main__':
     main()
