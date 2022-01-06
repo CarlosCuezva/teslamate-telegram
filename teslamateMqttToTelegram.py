@@ -73,8 +73,9 @@ def on_message(client, userdata, message):
             case 'version':
                 data["software_current_version"] = payload
             case 'update_version':
-                data["software_new_version"] = payload
-                text = "🎁  Nueva versión disponible: _{}_".format(payload)
+                if payload != "" and payload != data["software_current_version"]:
+                    data["software_new_version"] = payload
+                    text = "🎁  Nueva versión disponible: _{}_".format(payload)
             case 'state':
                 if data["state"] != payload:
                     if payload == "online":
