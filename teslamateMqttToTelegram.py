@@ -44,7 +44,7 @@ def on_connect(client, userdata, flags, rc):
         "send": 0,
         "text": "🎉 Ahora estás conectado con _TeslaMate_ 🎉"
     }
-    sendToTelegram()
+    send_to_telegram()
 
 
 def on_disconnect(client, userdata, rc=0):
@@ -65,37 +65,39 @@ def on_message(client, userdata, message):
         payload = str(message.payload.decode("utf-8"))
         text = ""
 
-        match topic:
-            case 'display_name':
-                if data["display_name"] != "" and data["display_name"] != payload:
-                    text = "🚘 ha cambiado su nombre a *{}*".format(payload)
-                data["display_name"] = payload
-            case 'version':
-                data["software_current_version"] = payload
-            case 'update_version':
-                if payload != "" and payload != data["software_current_version"]:
-                    data["software_new_version"] = payload
-                    text = "🎁  Nueva versión disponible: _{}_".format(payload)
-            case 'state':
-                if data["state"] != payload:
-                    if payload == "online":
-                        text = "✨ está despierto"
-                    elif payload == "asleep":
-                        text = "💤 está dormido"
-                    elif payload == "suspended":
-                        text = "🛏️ está durmiéndose"
-                    elif payload == "charging":
-                        text = "🔌 está cargando"
-                    elif payload == "offline":
-                        text = "🛰️ no está conectado"
-                    elif payload == "start":
-                        text = "🚀 está arrancando"
-                    elif payload == "driving":
-                        text = "🏁 está conduciendo"
-                    else:
-                        text = "⭕ tiene un estado desconocido"
+        if topic == "display_name":
+            if data["display_name"] != "" and data["display_name"] != payload:
+                text = "🚘 ha cambiado su nombre a *{}*".format(payload)
+            data["display_name"] = payload
+        elif topic == "version":
+            data["software_current_version"] = payload
+        elif topic == "update_version":
+            if payload != "" and payload != data["software_current_version"]:
+                data["software_new_version"] = payload
+                text = "🎁  Nueva versión disponible: _{}_".format(payload)
+        elif topic == "state":
+            if data["state"] != payload:
+                if payload == "online":
+                    text = "✨ está despierto"
+                elif payload == "asleep":
+                    text = "💤 está dormido"
+                elif payload == "suspended":
+                    text = "🛏️ está durmiéndose"
+                elif payload == "charging":
+                    text = "🔌 está cargando"
+                elif payload == "offline":
+                    text = "🛰️ no está conectado"
+                elif payload == "start":
+                    text = "🚀 está arrancando"
+                elif payload == "driving":
+                    text = "🏁 está conduciendo"
+                else:
+                    text = "⭕ tiene un estado desconocido"
 
-                data["state"] = payload
+            data["state"] = payload
+
+        if conf.DEBUG:
+            logger.debug(topic + ": " + payload)
 
         if text != "":
             botMessage = {
@@ -104,21 +106,26 @@ def on_message(client, userdata, message):
             }
 
         if topic in OPTIONS and botMessage['send'] == 0 and botMessage['text'] != "":
-            sendToTelegram()
-
-        return
+            send_to_telegram()
 
     except:
         logger.error("Exception on_message(): ", sys.exc_info()[0], message.topic, message.payload)
 
 
-def sendToTelegram():
+def get_formated_text():
+
+    if data["display_name"] != "":
+        txt = "*{}* {}".format(data["display_name"], botMessage['text'])
+    else:
+        txt = "{}".format(botMessage['text'])
+
+    return txt
+
+
+def send_to_telegram():
     global botMessage
 
-    txt = "*{}* {}"
-    txt = txt.format(data["display_name"], botMessage['text'])
-
-    send_text = 'https://api.telegram.org/bot' + conf.BOT_TOKEN + '/sendMessage?chat_id=' + conf.BOT_CHAT_ID + '&parse_mode=Markdown&text=' + txt
+    send_text = 'https://api.telegram.org/bot' + conf.BOT_TOKEN + '/sendMessage?chat_id=' + conf.BOT_CHAT_ID + '&parse_mode=Markdown&text=' + get_formated_text()
     response = requests.get(send_text)
     if conf.DEBUG:
         logger.debug(data)

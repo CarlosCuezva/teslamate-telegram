@@ -6,7 +6,7 @@ Python container that collects data from the Teslamate MQTT and sends messages t
 
 ### Requirements
 
-* Python 3.10+
+* Python 2.7+
 * Install dependencies of Python included in requirements.txt
 
 ### Instructions
