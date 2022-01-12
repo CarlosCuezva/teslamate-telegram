@@ -2,7 +2,7 @@
 
 [![](https://img.shields.io/badge/Donate-PayPal-ff69b4.svg)](https://www.paypal.com/donate?hosted_button_id=9H6B9CRBL6V4E)
 
-Python container that collects data from the Teslamate MQTT and sends messages to a Telegram chatbot.
+Script that collects data from the Teslamate via MQTT and sends messages to a Telegram chatbot.
 
 ### Requirements
 
