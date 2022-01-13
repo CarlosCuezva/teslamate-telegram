@@ -33,5 +33,5 @@ python ./teslamateMqttToTelegram.py
 ~~~
 * Run in the background
 ~~~
-nohup python ./teslamateMqttToTelegram.py &
+nohup python ./teslamateMqttToTelegram.py & > /dev/null 2>&1
 ~~~
