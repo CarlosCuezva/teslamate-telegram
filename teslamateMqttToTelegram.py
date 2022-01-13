@@ -69,32 +69,32 @@ def on_message(client, userdata, message):
 
         if topic == "display_name":
             if data["display_name"] != "" and data["display_name"] != payload:
-                text = "🚘 ha cambiado su nombre a *{}*".format(payload)
+                text = "🚘 Ha cambiado su nombre a *{}*".format(payload)
             data["display_name"] = payload
         elif topic == "version":
             data["software_current_version"] = payload
         elif topic == "update_version":
             if payload != "" and payload != data["software_current_version"]:
                 data["software_new_version"] = payload
-                text = "🎁  Nueva versión disponible: _{}_".format(payload)
+                text = "🎁 Actualización disponible: _{}_".format(payload)
         elif topic == "state":
             if data["state"] != payload:
                 if payload == "online":
-                    text = "✨ está despierto"
+                    text = "✨ Está despierto"
                 elif payload == "asleep":
-                    text = "💤 está dormido"
+                    text = "💤 Está dormido"
                 elif payload == "suspended":
-                    text = "🛏️ está durmiéndose"
+                    text = "🛏️ Está durmiéndose"
                 elif payload == "charging":
-                    text = "🔌 está cargando"
+                    text = "🔌 Está cargando"
                 elif payload == "offline":
-                    text = "🛰️ no está conectado"
+                    text = "🛰️ No está conectado"
                 elif payload == "start":
-                    text = "🚀 está arrancando"
+                    text = "🚀 Está arrancando"
                 elif payload == "driving":
-                    text = "🏁 está conduciendo"
+                    text = "🏁 Está conduciendo"
                 else:
-                    text = "⭕ tiene un estado desconocido"
+                    text = "⭕ Estado desconocido"
 
             data["state"] = payload
 
