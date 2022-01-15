@@ -67,7 +67,9 @@ def on_message(client, userdata, message):
         payload = str(message.payload.decode("utf-8"))
         text = ""
 
-        if topic == "version":
+        if topic == "display_name":
+            data["display_name"] = payload
+        elif topic == "version":
             data["software_current_version"] = payload
         elif topic == "update_version":
             if payload != "" and payload != data["software_current_version"]:
