@@ -92,7 +92,7 @@ def on_message(client, userdata, message):
                 elif payload == "driving":
                     text = "🏁 Está conduciendo"
                 else:
-                    text = "⭕ Estado desconocido"
+                    text = "⭕ Estado desconocido: _{}_".format(payload)
 
             data["state"] = payload
 
