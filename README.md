@@ -36,3 +36,7 @@ python ./teslamateMqttToTelegram.py
 ~~~
 nohup python ./teslamateMqttToTelegram.py & > /dev/null 2>&1
 ~~~
+## Credits
+
+- Authors: Carlos Cuezva – [List of contributors](https://github.com/carloscuezva/teslamate-telegram/graphs/contributors)
+- Distributed under MIT License
