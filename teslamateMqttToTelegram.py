@@ -9,6 +9,7 @@ import logging
 import logging.handlers
 
 data = {
+    "sent_resumen": 0,
     "display_name": "",
     "state": "",
     "software_current_version": "",
@@ -99,6 +100,7 @@ def on_message(client, userdata, message):
                     text = "✨ Está despierto"
                 elif payload == "asleep":
                     text = "💤 Está dormido"
+                    data['sent_resumen'] = 0
                 elif payload == "suspended":
                     text = "🛏️ Está durmiéndose"
                 elif payload == "charging":
@@ -118,9 +120,6 @@ def on_message(client, userdata, message):
             logger.debug(topic + ": " + payload)
 
         if text != "":
-            text = text + "\n🔋{0}% ({1}%)".format(data["usable_battery_level"],data["battery_level"]) \
-                  + "\n🌡️ interior {0}ºC".format(data["inside_temp"]) + "\n🌡️ exterior {0}ºC".format(data["outside_temp"]) \
-                  + "\n 🌎 [Lat: {0} , Long: {1}](http://maps.google.com/maps?q=loc:{0},{1})".format(data["latitude"], data["longitude"])
             botMessage = {
                 "send": 0,
                 "text": text
@@ -141,6 +140,29 @@ def get_formated_text():
         txt = "{}".format(botMessage['text'])
 
     return txt
+
+
+def send_resume():
+    global botMessage, data
+
+    if conf.DEBUG:
+        logger.info("Send resume to Telegram")
+
+    if data["usable_battery_level"] != data["battery_level"]:
+        bat = "{0}% ({1}%)".format(data["usable_battery_level"], data["battery_level"])
+    else:
+        bat = "{0}%".format(data["usable_battery_level"])
+
+    text = "🔋 Usable {}".format(bat) \
+           + "\n🌡️ Interior {0}ºC".format(data["inside_temp"]) \
+           + "\n🌡️ Exterior {0}ºC".format(data["outside_temp"]) \
+           + "\n🌎 [Lat: {0} , Long: {1}](http://maps.google.com/maps?q=loc:{0},{1})".format(data["latitude"], data["longitude"])
+    botMessage = {
+        "send": 0,
+        "text": text
+    }
+    data['sent_resumen'] = 1
+    send_to_telegram()
 
 
 def send_to_telegram():
@@ -181,6 +203,9 @@ def main():
 
     while True:
         sleep(5)
+
+        if data['state'] == "asleep" and conf.SEND_RESUME and data['sent_resumen'] == 0:
+            send_resume()
 
 
 if __name__ == '__main__':

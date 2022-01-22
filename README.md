@@ -24,6 +24,7 @@ BOT_TOKEN = "@@@@@@@@@@:@@@@@@@@@@@@@@@@@@@@"         # Bot token
 BOT_CHAT_ID = "@@@@@@@@@@"                            # Chat ID
 OPTIONS = "update_version"                            # Select options to send notification (options: state, update_version, display_name, (e.g. "state|update_version"))  
 CAR_ID = "1"                                          # Car number (usually 1 if you only have a car)
+SEND_RESUME = True/False                              # Enable or disable resume when state change to sleep
 DEBUG = True/False                                    # Enable or disable debug mode
 ~~~
 4. Run the script
