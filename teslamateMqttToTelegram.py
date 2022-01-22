@@ -19,7 +19,8 @@ data = {
     "inside_temp": 22,
     "outside_temp": 22,
     "longitude": -5,
-    "latitude": 42
+    "latitude": 42,
+    "geofence": ""
 }
 botMessage = {
     "send": 1,
@@ -115,6 +116,8 @@ def on_message(client, userdata, message):
                     text = "⭕ Estado desconocido"
 
             data["state"] = payload
+        elif topic == "geofence":
+            data["geofence"] = payload
 
         if conf.DEBUG:
             logger.debug(topic + ": " + payload)
@@ -149,14 +152,20 @@ def send_resume():
         logger.info("Send resume to Telegram")
 
     if data["usable_battery_level"] != data["battery_level"]:
-        bat = "{0}% ({1}%)".format(data["usable_battery_level"], data["battery_level"])
+        bat = "Usable {0}% (disponible {1}%)".format(data["usable_battery_level"], data["battery_level"])
     else:
-        bat = "{0}%".format(data["usable_battery_level"])
+        bat = "Disponible {0}%".format(data["usable_battery_level"])
 
-    text = "🔋 Usable {}".format(bat) \
-           + "\n🌡️ Interior {0}ºC".format(data["inside_temp"]) \
-           + "\n🌡️ Exterior {0}ºC".format(data["outside_temp"]) \
-           + "\n🌎 [Lat: {0} , Long: {1}](http://maps.google.com/maps?q=loc:{0},{1})".format(data["latitude"], data["longitude"])
+    if data["geofence"] != "":
+        geo = "Estás en [{0}](https://maps.google.com/maps?q=loc:{1},{2})".format(data["geofence"], data["latitude"], data["longitude"])
+    else:
+        geo = "[Lat: {0}, Long: {1}](https://maps.google.com/maps?q=loc:{0},{1})".format(data["latitude"], data["longitude"])
+
+    text = " -> Resumen:" \
+           + "\n\n    🔋 {}".format(bat) \
+           + "\n    🌡️ Interior {0}ºC".format(data["inside_temp"]) \
+           + "\n    🌡️ Exterior {0}ºC".format(data["outside_temp"]) \
+           + "\n    🌎 {}".format(geo)
     botMessage = {
         "send": 0,
         "text": text
