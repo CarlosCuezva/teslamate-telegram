@@ -12,7 +12,13 @@ data = {
     "display_name": "",
     "state": "",
     "software_current_version": "",
-    "software_new_version": ""
+    "software_new_version": "",
+    "battery_level": 100,
+    "usable_battery_level": 100,
+    "inside_temp": 22,
+    "outside_temp": 22,
+    "longitude": -5,
+    "latitude": 42
 }
 botMessage = {
     "send": 1,
@@ -71,6 +77,18 @@ def on_message(client, userdata, message):
             data["display_name"] = payload
         elif topic == "version":
             data["software_current_version"] = payload
+        elif topic == "battery_level":
+            data["battery_level"] = payload
+        elif topic == "usable_battery_level":
+            data["usable_battery_level"] = payload
+        elif topic == "inside_temp":
+            data["inside_temp"] = payload
+        elif topic == "outside_temp":
+            data["outside_temp"] = payload
+        elif topic == "longitude":
+            data["longitude"] = payload
+        elif topic == "latitude":
+            data["latitude"] = payload
         elif topic == "update_version":
             if payload != "" and payload != data["software_current_version"]:
                 data["software_new_version"] = payload
@@ -92,7 +110,7 @@ def on_message(client, userdata, message):
                 elif payload == "driving":
                     text = "🏁 Está conduciendo"
                 else:
-                    text = "⭕ Estado desconocido: _{}_".format(payload)
+                    text = "⭕ Estado desconocido"
 
             data["state"] = payload
 
@@ -100,6 +118,9 @@ def on_message(client, userdata, message):
             logger.debug(topic + ": " + payload)
 
         if text != "":
+            text = text + "\n🔋{0}% ({1}%)".format(data["usable_battery_level"],data["battery_level"]) \
+                  + "\n🌡️ interior {0}ºC".format(data["inside_temp"]) + "\n🌡️ exterior {0}ºC".format(data["outside_temp"]) \
+                  + "\n 🌎 [Lat: {0} , Long: {1}](http://maps.google.com/maps?q=loc:{0},{1})".format(data["latitude"], data["longitude"])
             botMessage = {
                 "send": 0,
                 "text": text
@@ -125,7 +146,7 @@ def get_formated_text():
 def send_to_telegram():
     global botMessage
 
-    send_text = 'https://api.telegram.org/bot' + conf.BOT_TOKEN + '/sendMessage?chat_id=' + conf.BOT_CHAT_ID + '&parse_mode=Markdown&text=' + get_formated_text()
+    send_text = 'https://api.telegram.org/bot' + conf.BOT_TOKEN + '/sendMessage?chat_id=' + conf.BOT_CHAT_ID + '&parse_mode=Markdown&disable_web_page_preview=True&text=' + get_formated_text()
     response = requests.get(send_text)
     if conf.DEBUG:
         logger.debug(data)
