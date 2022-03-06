@@ -112,6 +112,8 @@ def on_message(client, userdata, message):
                     text = "🚀 Está arrancando"
                 elif payload == "driving":
                     text = "🏁 Está conduciendo"
+                elif payload == "updating":
+                    text = "🔄 Está actualizándose"
                 else:
                     text = "⭕ Estado desconocido"
 
