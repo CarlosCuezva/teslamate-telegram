@@ -1,6 +1,6 @@
 # TeslaMate to Telegram
 
-[![](https://img.shields.io/badge/Donate-PayPal-ff69b4.svg)](https://www.paypal.com/donate?hosted_button_id=9H6B9CRBL6V4E)
+[![](https://img.shields.io/badge/Donate-PayPal-ff69b4.svg)](https://www.paypal.com/donate?hosted_button_id=QF2MBMQZP4V2J)
 
 Script that collects data from the Teslamate via MQTT and sends messages to a Telegram chatbot.
 
